@@ -1,36 +1,35 @@
 package com.haedal.interviewhelper.presentation.activity.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.google.firebase.auth.FirebaseAuth
+import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+            return
+        }
+
         setContent {
             InterviewHelperTheme {
-                AuthScreen(onSignUp = ::onSignup, onLogin = ::onLogin)
+                AuthNavHost()
             }
         }
-    }
-
-    private fun onSignup(){
-        showToast("회원가입 기능 구현 전입니다.")
-    }
-
-    private fun onLogin(){
-        showToast("로그인 기능 구현 전입니다.")
     }
 
     private fun showToast(text :String){
@@ -38,6 +37,4 @@ class AuthActivity : ComponentActivity() {
     }
 
 }
-
-
 

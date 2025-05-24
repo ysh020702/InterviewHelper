@@ -12,7 +12,6 @@ private const val TAG = "OnBoardingActivity"
 class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             InterviewHelperTheme {
                 Log.d(TAG, "onCreate: ")
@@ -23,10 +22,3 @@ class OnboardingActivity : ComponentActivity() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun OnboardingPreview() {
-    InterviewHelperTheme {
-        OnboardingScreen()
-    }
-}

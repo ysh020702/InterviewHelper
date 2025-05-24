@@ -13,22 +13,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.haedal.interviewhelper.presentation.activity.auth.AuthActivity
-import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.Color03
+import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.theme.PrimaryButton
 import com.haedal.interviewhelper.presentation.theme.White
 import kotlinx.coroutines.launch
+
+private const val PAGE_NUMBER = 3
 
 @Composable
 fun OnboardingScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f,
-        pageCount = { 3 }
+        pageCount = { PAGE_NUMBER }
     )
 
     val isLastPage by remember {
@@ -73,7 +77,7 @@ fun OnboardingScreen() {
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.Center
         ) {
-            repeat(3) { index ->
+            repeat(PAGE_NUMBER) { index ->
                 val color = if (pagerState.currentPage == index) Color.DarkGray else Color.LightGray
                 Box(
                     modifier = Modifier
@@ -103,5 +107,13 @@ fun OnboardingScreen() {
             contentColor = White
 
         )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OnboardingPreview() {
+    InterviewHelperTheme {
+        OnboardingScreen()
     }
 }

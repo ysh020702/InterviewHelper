@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "627581359813",
+    "project_id": "interview-2e754",
+    "storage_bucket": "interview-2e754.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:627581359813:android:2358620cbd5c9055eac2ac",
+        "android_client_info": {
+          "package_name": "com.haedal.interviewhelper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "627581359813-lhnogl9imon51liq02gpv9ik9k9bcanr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.haedal.interviewhelper",
+            "certificate_hash": "25b9d0fff690147106b275c30deb0909cd81533a"
+          }
+        },
+        {
+          "client_id": "627581359813-pbtaot4qthmbu9pjie97tu8d2rnt0g9o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhjqxK9fd5LWfgbnYFVESzpS6NsoyqwJA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "627581359813-pbtaot4qthmbu9pjie97tu8d2rnt0g9o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
