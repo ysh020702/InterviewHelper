@@ -7,11 +7,12 @@ import androidx.compose.material3.Typography
 
 val Typography = Typography(
     bodyLarge = TextStyle(
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Normal
+        fontFamily = NotoSansKR,
+        fontSize = 16.sp
     ),
-    headlineMedium = TextStyle(
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Bold
+    labelLarge = TextStyle(
+        fontFamily = NotoSansKR,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Medium
     )
 )
