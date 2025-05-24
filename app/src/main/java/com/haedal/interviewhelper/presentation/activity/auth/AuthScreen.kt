@@ -27,7 +27,7 @@ fun AuthScreen(
     Box(
         modifier = Modifier.run {
             fillMaxSize()
-                .background(Black)
+                .background(White)
         }, // 배경색 (추가적인 페이지 컬러)
         contentAlignment = Alignment.Center
     ) {
@@ -61,7 +61,7 @@ fun AuthScreen(
                 )
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(96.dp))
 
             Column {
                 PrimaryButton(
@@ -83,5 +83,13 @@ fun AuthScreen(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AuthPreview() {
+    InterviewHelperTheme {
+        AuthScreen(onSignUp = {}, onLogin = {})
     }
 }

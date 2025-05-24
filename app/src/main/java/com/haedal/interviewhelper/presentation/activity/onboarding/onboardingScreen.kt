@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.haedal.interviewhelper.presentation.activity.auth.AuthActivity
 import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.Color03
 import com.haedal.interviewhelper.presentation.theme.PrimaryButton
@@ -87,7 +88,7 @@ fun OnboardingScreen() {
             text = if (isLastPage) "시작하기" else "다음",
             onClick = {
                 if (isLastPage) {
-                    context.startActivity(Intent(context, HomeActivity::class.java))
+                    context.startActivity(Intent(context, AuthActivity::class.java))
                     (context as? Activity)?.finish()
                 } else {
                     scope.launch {

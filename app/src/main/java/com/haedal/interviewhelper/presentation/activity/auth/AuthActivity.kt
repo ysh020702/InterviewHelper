@@ -41,10 +41,3 @@ class AuthActivity : ComponentActivity() {
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun AuthPreview() {
-    InterviewHelperTheme {
-        AuthScreen(onSignUp = {}, onLogin = {})
-    }
-}
