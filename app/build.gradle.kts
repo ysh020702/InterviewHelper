@@ -4,7 +4,7 @@ plugins {
 
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.dagger.hilt)
-    //id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
     kotlin("plugin.serialization") version "2.0.21"
     alias(libs.plugins.kotlin.compose)
 }

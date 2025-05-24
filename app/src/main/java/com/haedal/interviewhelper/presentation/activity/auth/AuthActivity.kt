@@ -6,6 +6,8 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
 import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
@@ -16,14 +18,6 @@ class AuthActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
-            return
-        }
 
         setContent {
             InterviewHelperTheme {
