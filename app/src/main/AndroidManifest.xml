@@ -14,26 +14,28 @@
         android:theme="@style/Theme.InterviewHelper"
         tools:targetApi="31">
         <activity
+            android:name=".presentation.activity.auth.AuthActivity"
+            android:exported="false"
+            android:label="@string/title_activity_auth"
+            android:theme="@style/Theme.InterviewHelper" />
+        <activity
             android:name=".presentation.activity.home.HomeActivity"
             android:exported="false"
             android:label="@string/title_activity_home"
             android:theme="@style/Theme.InterviewHelper" />
         <activity
-            android:name=".presentation.activity.onboarding.OnBoardingActivity"
+            android:name=".presentation.activity.onboarding.OnboardingActivity"
             android:exported="true"
-            android:theme="@style/Theme.InterviewHelper" >
+            android:theme="@style/Theme.InterviewHelper">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
         <activity
             android:name=".presentation.activity.MainActivity"
-            android:exported="true">
-
-        </activity>
+            android:exported="true"></activity>
     </application>
 
 </manifest>
