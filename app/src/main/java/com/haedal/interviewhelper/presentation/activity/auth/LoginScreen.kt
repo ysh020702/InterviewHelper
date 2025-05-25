@@ -1,6 +1,5 @@
 package com.haedal.interviewhelper.presentation.activity.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,9 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.haedal.interviewhelper.presentation.theme.PrimaryButton
-import com.haedal.interviewhelper.presentation.theme.White
-import com.haedal.interviewhelper.presentation.viewmodel.AuthViewModel
-import androidx.compose.foundation.text.KeyboardOptions
+import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -35,7 +32,7 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel,
+    viewModel: UserViewModel,
     onSuccess: () -> Unit,
     onBack: () -> Unit
 ) {

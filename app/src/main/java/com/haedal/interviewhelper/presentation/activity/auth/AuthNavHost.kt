@@ -6,13 +6,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.content.ContextCompat.startActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
-import com.haedal.interviewhelper.presentation.viewmodel.AuthViewModel
+import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 
 @Composable
 fun AuthNavHost() {
@@ -27,7 +26,7 @@ fun AuthNavHost() {
             )
         }
         composable("login") {
-            val viewModel: AuthViewModel = hiltViewModel()
+            val viewModel: UserViewModel = hiltViewModel()
 
             LoginScreen(
                 viewModel = viewModel,
@@ -38,7 +37,7 @@ fun AuthNavHost() {
             )
         }
         composable("signup") {
-            val viewModel: AuthViewModel = hiltViewModel()
+            val viewModel: UserViewModel = hiltViewModel()
 
             SignUpScreen(
                 viewModel = viewModel,

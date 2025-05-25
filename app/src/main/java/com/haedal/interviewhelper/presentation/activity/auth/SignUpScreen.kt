@@ -1,6 +1,5 @@
 package com.haedal.interviewhelper.presentation.activity.auth
 
-import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
@@ -14,19 +13,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.haedal.interviewhelper.presentation.theme.PrimaryButton
-import com.haedal.interviewhelper.presentation.theme.White
-import com.haedal.interviewhelper.presentation.viewmodel.AuthViewModel
+import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 
 @Composable
 fun SignUpScreen(
-    viewModel: AuthViewModel,
+    viewModel: UserViewModel,
     onSuccess: () -> Unit,
     onBack: () -> Unit
 ) {
+    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
@@ -43,6 +41,15 @@ fun SignUpScreen(
         Text("회원가입", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(32.dp))
+
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("이름") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedTextField(
             value = email,
@@ -77,7 +84,7 @@ fun SignUpScreen(
             text = "회원가입",
             onClick = {
                 if (password == confirm) {
-                    viewModel.signUp(email, password)
+                    viewModel.signUp(email, password, name)
                 } else {
                     viewModel.signUpResult = Result.failure(Exception("비밀번호가 일치하지 않습니다."))
                 }
