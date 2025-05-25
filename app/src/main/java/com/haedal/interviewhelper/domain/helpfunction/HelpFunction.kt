@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.tasks.await
 
@@ -33,3 +34,55 @@ suspend fun loadDailyQuestion(): String {
 }
 
 const val WEB_CLIENT_ID = "627581359813-pbtaot4qthmbu9pjie97tu8d2rnt0g9o.apps.googleusercontent.com"
+
+fun insertDummyDataForTestUser() {
+    val db = FirebaseDatabase.getInstance().reference
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    // 1. Daily Question
+    db.child("dailyQuestion").child("text").setValue(
+        "최근에 당신이 도전한 일은 무엇인가요?"
+    )
+
+    // 2. Global Contents (4개)
+    val contents = mapOf(
+        "item1" to mapOf(
+            "title" to "모범 답변 듣기",
+            "description" to "실제 인터뷰 예시 음성을 들어보세요."
+        ),
+        "item2" to mapOf(
+            "title" to "면접관이 좋아하는 키워드",
+            "description" to "자주 언급되는 핵심 표현들을 확인하세요."
+        ),
+        "item3" to mapOf(
+            "title" to "AI 피드백 예시 보기",
+            "description" to "AI가 어떻게 응답을 평가하는지 알아보세요."
+        ),
+        "item4" to mapOf(
+            "title" to "면접 체크리스트",
+            "description" to "준비사항을 빠짐없이 확인해보세요."
+        )
+    )
+    db.child("contents").setValue(contents)
+
+    // 3. 개인별 Feedbacks (4개)
+    val feedbacks = mapOf(
+        "item1" to mapOf(
+            "question" to "자신의 단점을 말해보세요.",
+            "feedback" to "좀 더 자신감 있는 태도로 말해보세요."
+        ),
+        "item2" to mapOf(
+            "question" to "리더십 경험을 말해보세요.",
+            "feedback" to "구체적인 팀 상황을 예로 들면 좋아요."
+        ),
+        "item3" to mapOf(
+            "question" to "성공적인 프로젝트 경험은?",
+            "feedback" to "성과를 수치로 표현해보면 좋습니다."
+        ),
+        "item4" to mapOf(
+            "question" to "갈등을 어떻게 해결하나요?",
+            "feedback" to "본인의 역할을 중심으로 설명해보세요."
+        )
+    )
+    db.child("users").child(uid).child("feedbacks").setValue(feedbacks)
+}

@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.haedal.interviewhelper.domain.helpfunction.*
 import com.haedal.interviewhelper.domain.helpfunction.moveActivity
 import com.haedal.interviewhelper.presentation.activity.auth.AuthActivity
@@ -30,8 +31,8 @@ class HomeActivity : ComponentActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val name = viewModel.loadUserName()
             val feedbackList = viewModel.loadUserFeedbacks()
-            val contentList = loadGlobalContents()       // 다음 단계에서 정의
-            val dailyQuestion = loadDailyQuestion()      // 다음 단계에서 정의
+            val contentList = loadGlobalContents()
+            val dailyQuestion = loadDailyQuestion()
 
             withContext(Dispatchers.Main) {
                 setContent {
@@ -53,4 +54,6 @@ class HomeActivity : ComponentActivity() {
             }
         }
     }
+
+
 }
