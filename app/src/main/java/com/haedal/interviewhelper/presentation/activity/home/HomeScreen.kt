@@ -1,6 +1,7 @@
 package com.haedal.interviewhelper.presentation.activity.home
 
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.ui.tooling.preview.Preview
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
+import com.haedal.interviewhelper.presentation.theme.White
 
 @Composable
 fun HomeScreen(
@@ -26,12 +28,14 @@ fun HomeScreen(
     onStartInterview: () -> Unit,
     onLogout: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(White)) {
         // 상단 바 (안내 + 로그아웃)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(top = 48.dp, start = 24.dp, end = 24.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -41,11 +45,6 @@ fun HomeScreen(
                     fontWeight = FontWeight.SemiBold
                 )
             )
-
-            // ✅ 로그아웃 버튼 제안 ① : 텍스트 버튼
-            TextButton(onClick = onLogout) {
-                Text("로그아웃", color = Color.Gray)
-            }
 
             // ✅ 로그아웃 버튼 제안 ② : 아이콘 버튼 (더 미니멀하게)
             IconButton(onClick = onLogout) {

@@ -67,6 +67,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation("androidx.navigation:navigation-compose:2.9.0")
+    implementation("androidx.compose.material:material-icons-extended")
 
     //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.14.0"))

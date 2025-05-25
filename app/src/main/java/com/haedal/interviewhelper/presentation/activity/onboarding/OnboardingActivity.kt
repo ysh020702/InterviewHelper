@@ -1,5 +1,7 @@
 package com.haedal.interviewhelper.presentation.activity.onboarding
 
+import android.app.Activity
+import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.auth.FirebaseAuth
 import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
+
 private const val TAG = "OnBoardingActivity"
 class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,7 +22,13 @@ class OnboardingActivity : ComponentActivity() {
         //자동 로그인
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
+            val intent = Intent(this, HomeActivity::class.java)
+            val options = ActivityOptions.makeCustomAnimation(
+                this,
+                android.R.anim.fade_in,
+                android.R.anim.fade_out
+            )
+            startActivity(intent, options.toBundle())
             finish()
             return
         }
