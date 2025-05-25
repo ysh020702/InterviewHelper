@@ -10,6 +10,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.haedal.interviewhelper.domain.helpfunction.moveActivity
 import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 
@@ -51,13 +52,5 @@ fun AuthNavHost() {
 }
 
 fun onSuccess(context: Context) {
-    val intent = Intent(context, HomeActivity::class.java)
-    val options = ActivityOptions.makeCustomAnimation(
-        context,
-        android.R.anim.fade_in,
-        android.R.anim.fade_out
-    )
-    context.startActivity(intent, options.toBundle())
-    (context as? Activity)?.finish()
-
+    moveActivity<HomeActivity>(context = context, finishFlag = true)
 }
