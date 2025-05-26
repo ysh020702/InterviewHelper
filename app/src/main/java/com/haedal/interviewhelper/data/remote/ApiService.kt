@@ -14,5 +14,5 @@ interface ApiService {
     @POST("interviewHelper/upload") // Nginx 경로에 맞춰서 작성
     suspend fun uploadAudio(
         @Part file: MultipartBody.Part
-    ): Response<ResponseBody>
+    ): Response<UploadResult>
 }

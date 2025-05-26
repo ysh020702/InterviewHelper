@@ -1,6 +1,7 @@
 package com.haedal.interviewhelper.data.repository
 
 import com.haedal.interviewhelper.data.remote.ApiService
+import com.haedal.interviewhelper.data.remote.UploadResult
 import com.haedal.interviewhelper.domain.repository.AudioRepository
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -15,7 +16,7 @@ class AudioRepositoryImpl(
     private val api: ApiService
 ) : AudioRepository {
 
-    override suspend fun uploadWav(file: File): Response<ResponseBody> {
+    override suspend fun uploadWav(file: File): Response<UploadResult> {
         val requestFile = file.asRequestBody("audio/*".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 

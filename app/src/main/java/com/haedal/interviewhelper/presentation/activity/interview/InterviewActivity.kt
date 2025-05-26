@@ -1,5 +1,6 @@
 package com.haedal.interviewhelper.presentation.activity.interview
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import com.haedal.interviewhelper.presentation.activity.result.ResultActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.viewmodel.InterviewViewModel
 import com.haedal.interviewhelper.presentation.viewmodel.ResultState
@@ -54,10 +56,16 @@ class InterviewActivity : ComponentActivity() {
         lifecycleScope.launch {
             viewModel.uploadState.collectLatest { state ->
                 when (state) {
-                    is ResultState.Loading -> showToast("업로드 중입니다...")
-                    is ResultState.Success -> showToast("업로드 완료!")
+                    is ResultState.Success -> {
+                        val result = viewModel.uploadResult ?: "결과 없음"
+                        val intent = Intent(this@InterviewActivity, ResultActivity::class.java)
+                        intent.putExtra("result", result)
+                        startActivity(intent)
+                        finish()
+                    }
                     is ResultState.Error -> showToast("업로드 실패: ${state.message}")
-                    ResultState.Idle -> { /* 대기 상태 */ }
+                    is ResultState.Loading -> showToast("업로드 중입니다...")
+                    ResultState.Idle -> {}
                 }
             }
         }

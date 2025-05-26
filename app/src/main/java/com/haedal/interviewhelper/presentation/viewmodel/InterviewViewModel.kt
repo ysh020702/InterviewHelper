@@ -4,6 +4,7 @@ import android.Manifest
 import android.media.AudioFormat
 import android.media.AudioRecord
 import android.media.MediaRecorder
+import android.util.Log
 import androidx.annotation.RequiresPermission
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,10 @@ class InterviewViewModel @Inject constructor(
     private val _uploadState = MutableStateFlow<ResultState>(ResultState.Idle)
     val uploadState: StateFlow<ResultState> = _uploadState
 
+    // ====== 업로드 결과 ======
+    var uploadResult by mutableStateOf<String?>(null)
+        private set
+
     // ====== 주파수 분석 상태 ======
     var frequencyBins by mutableStateOf<List<Float>>(emptyList())
         private set
@@ -99,10 +104,14 @@ class InterviewViewModel @Inject constructor(
             _uploadState.value = ResultState.Loading
             try {
                 val response = audioRepository.uploadWav(file)
-                _uploadState.value = if (response.isSuccessful) {
-                    ResultState.Success
+                if (response.isSuccessful) {
+                    uploadResult = response.body()?.result
+                    _uploadState.value = ResultState.Success
+                    Log.d("UploadResponse", "raw body: ${response.body()}")
+                    Log.d("UploadResponse", "result: ${response.body()?.result}")
+
                 } else {
-                    ResultState.Error("오류: ${response.code()}")
+                    _uploadState.value = ResultState.Error("오류: ${response.code()}")
                 }
             } catch (e: Exception) {
                 _uploadState.value = ResultState.Error("예외 발생: ${e.localizedMessage}")
