@@ -18,7 +18,8 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     containerColor: Color = MaterialTheme.colorScheme.primary,  // 배경색
-    contentColor: Color = Color.Black                           // 글자색
+    contentColor: Color = Color.Black,
+    enabled: Boolean = true// 글자색
 ) {
     Button(
         onClick = onClick,
@@ -27,7 +28,8 @@ fun PrimaryButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = containerColor,
             contentColor = contentColor
-        )
+        ),
+        enabled = enabled
     ) {
         Text(
             text = text,

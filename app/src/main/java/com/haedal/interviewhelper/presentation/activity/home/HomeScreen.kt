@@ -3,6 +3,7 @@ package com.haedal.interviewhelper.presentation.activity.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -24,19 +25,29 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.QuestionAnswer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.haedal.interviewhelper.domain.helpfunction.vibrate
 import com.haedal.interviewhelper.presentation.theme.Color04
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.theme.White
+import com.haedal.interviewhelper.presentation.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     userName: String,
-    onStartInterview: () -> Unit,
+    onStartInterview: (String) -> Unit,
     onLogout: () -> Unit,
+    dailyQuestion: String = "",
     feedbackList: List<Pair<String, String>>,
-    contentList: List<Pair<String, String>>
+    contentList: List<Pair<String, String>>,
+    viewModel: HomeViewModel = viewModel()
 ) {
+    val selected = viewModel.selectedQuestion
+    val context = LocalContext.current
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,16 +79,27 @@ fun HomeScreen(
         ) {
             item {
                 SectionTitle("오늘의 추천 질문")
-                CardSection(
-                    content = "\"협업 중 갈등이 생겼을 때, 어떻게 해결했나요?\"",
-                    icon = Icons.Default.QuestionAnswer
+                SelectableCardSection(
+                    content = dailyQuestion,
+                    isSelected = selected == dailyQuestion,
+                    onSelect = {
+                        vibrate(context)
+                        viewModel.toggleSelection(dailyQuestion)
+                    }
                 )
             }
             item {
                 SectionTitle("최근 피드백받은 질문")
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    feedbackList.forEach { (question, feedback) ->
-                        FeedbackCard(question = question, feedback = feedback)
+                    feedbackList.forEach { (question, _) ->
+                        SelectableCardSection(
+                            content = question,
+                            isSelected = selected == question,
+                            onSelect = {
+                                vibrate(context)
+                                viewModel.toggleSelection(question)
+                            }
+                        )
                     }
                 }
             }
@@ -93,12 +115,15 @@ fun HomeScreen(
 
         PrimaryButton(
             text = "인터뷰 시작하기",
-            onClick = onStartInterview,
+            onClick = {
+                selected?.let { onStartInterview(it) }
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
             containerColor = Color03,
-            contentColor= White
+            contentColor= White,
+            enabled = selected != null
         )
     }
 }
@@ -107,21 +132,32 @@ fun HomeScreen(
 fun SectionTitle(text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
         modifier = Modifier.padding(vertical = 8.dp)
     )
 }
 
 @Composable
-fun CardSection(content: String, icon: ImageVector) {
+fun SelectableCardSection(
+    content: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(2.dp, Color.Gray),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth()
+        border = BorderStroke(2.dp, if (isSelected) Color03 else Color.Gray),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color03.copy(alpha = 0.2f) else Color.White
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {}, // 일반 클릭 무시
+                onLongClick = onSelect // 길게 눌러서만 선택
+            )
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
-            Icon(icon, contentDescription = null, tint = Color04)
+            Icon(Icons.Default.QuestionAnswer, contentDescription = null, tint = Color04)
             Spacer(Modifier.width(12.dp))
             Text(
                 text = content,

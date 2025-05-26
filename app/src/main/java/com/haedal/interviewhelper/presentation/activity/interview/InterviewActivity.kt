@@ -3,10 +3,18 @@ package com.haedal.interviewhelper.presentation.activity.interview
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
+import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.viewmodel.InterviewViewModel
 import com.haedal.interviewhelper.presentation.viewmodel.ResultState
+import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -16,17 +24,33 @@ import java.io.File
 class InterviewActivity : ComponentActivity() {
 
     private val viewModel: InterviewViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. 파일 준비 (예시)
-        val recordedFile = File(getExternalFilesDir(null), "recorded_audio.wav")
+        val question = intent.getStringExtra("question") ?: "질문이 전달되지 않았습니다."
 
-        // 2. 업로드 요청
-        viewModel.uploadAudioFile(recordedFile)
+        setContent {
+            InterviewHelperTheme {
+                var userName by remember { mutableStateOf("사용자") }
 
-        // 3. 상태 감지하여 UI 반영
+                LaunchedEffect(Unit) {
+                    userName = userViewModel.loadUserName()
+                }
+
+                InterviewScreen(
+                    question = question,
+                    userName = userName
+                )
+            }
+        }
+
+        observeUploadState()
+    }
+
+    // 업로드 상태 변화 감지
+    private fun observeUploadState() {
         lifecycleScope.launch {
             viewModel.uploadState.collectLatest { state ->
                 when (state) {
@@ -37,6 +61,12 @@ class InterviewActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    // (선택) 녹음 완료 후 직접 업로드 호출할 경우 사용
+    private fun uploadRecordedFile() {
+        val file = File(getExternalFilesDir(null), "recorded_audio.wav")
+        viewModel.uploadAudioFile(file) // 내부에서 internal로 설정되어 있어도 같은 모듈이면 호출 가능
     }
 
     private fun showToast(msg: String) {

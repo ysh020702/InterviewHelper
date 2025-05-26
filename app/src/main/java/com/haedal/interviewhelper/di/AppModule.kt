@@ -1,15 +1,19 @@
 package com.haedal.interviewhelper.di
 
+import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.haedal.interviewhelper.data.remote.ApiService
 import com.haedal.interviewhelper.data.remote.RetrofitInstance
+import com.haedal.interviewhelper.data.repository.AudioRecorderRepositoryImpl
 import com.haedal.interviewhelper.data.repository.AudioRepositoryImpl
+import com.haedal.interviewhelper.domain.repository.AudioRecorderRepository
 import com.haedal.interviewhelper.domain.repository.AudioRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -32,5 +36,13 @@ object AppModule {
     fun provideAudioRepository(
         apiService: ApiService
     ): AudioRepository = AudioRepositoryImpl(apiService)
+
+    @Provides
+    @Singleton
+    fun provideAudioRecorderRepository(
+        @ApplicationContext context: Context
+    ): AudioRecorderRepository {
+        return AudioRecorderRepositoryImpl(context)
+    }
 
 }

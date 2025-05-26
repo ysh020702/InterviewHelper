@@ -1,12 +1,20 @@
 package com.haedal.interviewhelper.domain.helpfunction
 
+import android.Manifest
 import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import androidx.annotation.RequiresPermission
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.tasks.await
+
+const val WEB_CLIENT_ID = "627581359813-pbtaot4qthmbu9pjie97tu8d2rnt0g9o.apps.googleusercontent.com"
+
 
 inline fun <reified T : Activity> moveActivity(context: Context, finishFlag: Boolean) {
     val intent = Intent(context, T::class.java)
@@ -33,7 +41,19 @@ suspend fun loadDailyQuestion(): String {
     return snapshot.getValue(String::class.java) ?: "오늘의 질문을 불러올 수 없습니다."
 }
 
-const val WEB_CLIENT_ID = "627581359813-pbtaot4qthmbu9pjie97tu8d2rnt0g9o.apps.googleusercontent.com"
+@RequiresPermission(Manifest.permission.VIBRATE)
+fun vibrate(context: Context) {
+    val vibrator = context.getSystemService(Vibrator::class.java)
+    if (vibrator != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.EFFECT_HEAVY_CLICK))
+        } else {
+            @Suppress("DEPRECATION")
+            vibrator.vibrate(100)
+        }
+    }
+}
+
 
 fun insertDummyDataForTestUser() {
     val db = FirebaseDatabase.getInstance().reference

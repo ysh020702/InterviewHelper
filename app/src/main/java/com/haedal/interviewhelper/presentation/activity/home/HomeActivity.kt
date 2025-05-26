@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.Manifest
+import android.content.Intent
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -37,12 +38,14 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         checkAudioPermission()
+        insertDummyDataForTestUser()
 
         CoroutineScope(Dispatchers.IO).launch {
             val name = viewModel.loadUserName()
-            val feedbackList = viewModel.loadUserFeedbacks()
-            val contentList = loadGlobalContents()
-            val dailyQuestion = loadDailyQuestion()
+            val dailyQuestion = loadDailyQuestion()             //오늘의 추천
+            val feedbackList = viewModel.loadUserFeedbacks()    //유저 최근 질문
+            val contentList = loadGlobalContents()              //글로벌 콘텐츠
+
 
             withContext(Dispatchers.Main) {
                 setContent {
@@ -50,9 +53,12 @@ class HomeActivity : ComponentActivity() {
                         HomeScreen(
                             userName = name,
                             feedbackList = feedbackList,
+                            dailyQuestion = dailyQuestion,
                             contentList = contentList,
-                            onStartInterview = {
-                                moveActivity<InterviewActivity>(context = this@HomeActivity, finishFlag = false)
+                            onStartInterview = { selectedQuestion ->
+                                val intent = Intent(this@HomeActivity, InterviewActivity::class.java)
+                                intent.putExtra("question", selectedQuestion)
+                                startActivity(intent)
                             },
                             onLogout = {
                                 FirebaseAuth.getInstance().signOut()
@@ -66,25 +72,42 @@ class HomeActivity : ComponentActivity() {
     }
 
     private fun checkAudioPermission() {
+        val audioGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        val vibrateGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED
+
         when {
-            ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED -> {
-                // 권한 이미 있음
+            audioGranted && vibrateGranted -> {
+                // 둘 다 권한 있음
             }
             shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
-                Toast.makeText(this, "이 기능을 사용하려면 마이크 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-                requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                Toast.makeText(this, "이 기능을 사용하려면 마이크 및 진동 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
+                requestAudioPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.VIBRATE
+                    )
+                )
             }
             else -> {
-                requestAudioPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+                requestAudioPermissionLauncher.launch(
+                    arrayOf(
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.VIBRATE
+                    )
+                )
             }
         }
     }
-
     private val requestAudioPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (!isGranted) {
-            Toast.makeText(this, "녹음을 위해 마이크 권한이 필요합니다.", Toast.LENGTH_LONG).show()
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
+        val vibrateGranted = permissions[Manifest.permission.VIBRATE] ?: false
+
+        if (audioGranted && vibrateGranted) {
+            // 권한 허용됨
+        } else {
+            Toast.makeText(this, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
 
