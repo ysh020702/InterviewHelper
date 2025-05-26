@@ -4,14 +4,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitInstance {
-    private val retrofit by lazy {
+    val api: ApiService by lazy {
         Retrofit.Builder()
-            .baseUrl("http://<서버 IP>:<포트번호>/")  // 예: http://192.168.0.2:8000/
+            .baseUrl("http://155.230.26.201/")  // 포트 없이, nginx에서 프록시 설정됨
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-    }
-
-    val api: ApiService by lazy {
-        retrofit.create(ApiService::class.java)
+            .create(ApiService::class.java)
     }
 }

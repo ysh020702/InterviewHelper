@@ -7,10 +7,12 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 
+
 interface ApiService {
+
     @Multipart
-    @POST("/upload")
+    @POST("interviewHelper/upload") // Nginx 경로에 맞춰서 작성
     suspend fun uploadAudio(
-        @Part audio: MultipartBody.Part
+        @Part file: MultipartBody.Part
     ): Response<ResponseBody>
 }
