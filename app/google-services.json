@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "627581359813",
+    "firebase_url": "https://interview-2e754-default-rtdb.firebaseio.com",
     "project_id": "interview-2e754",
     "storage_bucket": "interview-2e754.firebasestorage.app"
   },
@@ -14,11 +15,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "627581359813-lhnogl9imon51liq02gpv9ik9k9bcanr.apps.googleusercontent.com",
+          "client_id": "627581359813-qpnf8a031s0fb5sg8tr1eurep1tb39kp.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.haedal.interviewhelper",
-            "certificate_hash": "25b9d0fff690147106b275c30deb0909cd81533a"
+            "certificate_hash": "5bf861176e8f07003e70b613df2b7cd223ff59ab"
           }
         },
         {

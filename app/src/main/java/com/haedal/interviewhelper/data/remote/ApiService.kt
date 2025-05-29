@@ -11,7 +11,7 @@ import retrofit2.http.Part
 interface ApiService {
 
     @Multipart
-    @POST("interviewHelper/analyze") // 서버 경로에 맞춰서 작성
+    @POST("/analyze") // 서버 경로에 맞춰서 작성
     suspend fun uploadAudio(
         @Part file: MultipartBody.Part
     ): Response<AnalysisResponse>

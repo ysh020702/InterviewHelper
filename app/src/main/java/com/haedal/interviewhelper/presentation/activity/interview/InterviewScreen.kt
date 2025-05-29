@@ -49,14 +49,15 @@ fun InterviewScreen(
     ) {
         QuestionDisplay(
             question = question,
-            modifier = Modifier.weight(0.35f)
+            modifier = Modifier.weight(0.4f)
         )
         ControlPanel(
             isRecording = isRecording,
             elapsed = elapsed,
             frequencies = frequencies,
             uploadState = uploadState,   // ✅ 전달
-            onToggleRecording = onToggleRecording
+            onToggleRecording = onToggleRecording,
+            modifier = Modifier.weight(0.6f)  // ✅ 여기에 weight 추가!
         )
     }
 }
