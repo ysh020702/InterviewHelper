@@ -197,12 +197,3 @@ fun FrequencyVisualizer(frequencies: List<Float>) {
         }
     }
 }
-
-
-@Preview(showBackground = true)
-@Composable
-fun InterviewPreview() {
-    InterviewHelperTheme {
-        InterviewScreen("username", "Example Question")
-    }
-}

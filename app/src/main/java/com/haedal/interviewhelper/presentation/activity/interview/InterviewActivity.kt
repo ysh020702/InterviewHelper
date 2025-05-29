@@ -1,6 +1,7 @@
 package com.haedal.interviewhelper.presentation.activity.interview
 
 import android.Manifest
+import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,10 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.constraintlayout.motion.widget.Debug.getLocation
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import com.haedal.interviewhelper.presentation.activity.result.ResultActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
@@ -34,6 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.google.gson.Gson
 
 
 /*
@@ -43,6 +42,7 @@ import kotlinx.coroutines.launch
  */
 
 @Suppress("UNCHECKED_CAST")
+@AndroidEntryPoint
 class InterviewActivity : ComponentActivity() {
 
     private val viewModel: InterviewViewModel by viewModels()
@@ -119,7 +119,12 @@ class InterviewActivity : ComponentActivity() {
                         intent.putExtra("result_json", Gson().toJson(resultList))
                         intent.putExtra("server_message", message)
                         intent.putExtra("analysis_feedback", feedback)
-                        startActivity(intent)
+                        val options = ActivityOptions.makeCustomAnimation(
+                            this@InterviewActivity,
+                            android.R.anim.fade_in,
+                            android.R.anim.fade_out
+                        )
+                        startActivity(intent, options.toBundle())
                         finish()
                     }
                     is ResultState.Error -> showToast("업로드 실패: ${state.message}")
