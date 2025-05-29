@@ -1,32 +1,44 @@
 package com.haedal.interviewhelper.presentation.activity.onboarding
 
+import android.app.Activity
+import android.app.ActivityOptions
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.activity.viewModels
+import com.google.firebase.auth.FirebaseAuth
+import com.haedal.interviewhelper.domain.helpfunction.moveActivity
+import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
+import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
+
 private const val TAG = "OnBoardingActivity"
+
+@AndroidEntryPoint
 class OnboardingActivity : ComponentActivity() {
+    private val userViewModel: UserViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
-        setContent {
-            InterviewHelperTheme {
-                Log.d(TAG, "onCreate: ")
-                OnboardingScreen()
+        Log.d(TAG, "entry-onboardingScreen")
+
+        userViewModel.checkLoginStatus()
+        if (userViewModel.isLoggedIn) {
+            moveActivity<HomeActivity>(context = this, finishFlag = true)
+        } else {
+            setContent {
+                InterviewHelperTheme {
+                    OnboardingScreen()
+                }
             }
         }
     }
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun OnboardingPreview() {
-    InterviewHelperTheme {
-        OnboardingScreen()
-    }
-}

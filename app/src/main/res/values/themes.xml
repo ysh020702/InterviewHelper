@@ -1,8 +1,12 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.InterviewHelper" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- 공통 배경색 지정 -->
+        <item name="android:windowBackground">@color/white</item>
+
+        <!-- 필요에 따라 아래 색상도 white 계열로 설정 -->
+        <item name="colorSurface">@color/white</item>
+        <item name="colorSurfaceVariant">@color/white</item>
     </style>
 
     <style name="Theme.InterviewHelper" parent="Base.Theme.InterviewHelper" />

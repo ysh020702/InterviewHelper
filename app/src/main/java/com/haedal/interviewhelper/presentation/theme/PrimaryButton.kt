@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.haedal.interviewhelper.presentation.activity.auth.AuthScreen
 
 @Composable
 fun PrimaryButton(
@@ -19,7 +18,8 @@ fun PrimaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     containerColor: Color = MaterialTheme.colorScheme.primary,  // 배경색
-    contentColor: Color = Color.Black                           // 글자색
+    contentColor: Color = Color.Black,
+    enabled: Boolean = true// 글자색
 ) {
     Button(
         onClick = onClick,
@@ -29,11 +29,11 @@ fun PrimaryButton(
             containerColor = containerColor,
             contentColor = contentColor
         ),
-        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+        enabled = enabled
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.labelLarge
+            style = Typography.labelLarge
         )
     }
 }

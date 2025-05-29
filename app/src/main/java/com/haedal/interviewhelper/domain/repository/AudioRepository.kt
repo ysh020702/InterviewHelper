@@ -1,0 +1,10 @@
+package com.haedal.interviewhelper.domain.repository
+
+import com.haedal.interviewhelper.data.remote.UploadResult
+import okhttp3.ResponseBody
+import retrofit2.Response
+import java.io.File
+
+interface AudioRepository {
+    suspend fun uploadWav(file: File): Response<UploadResult>
+}

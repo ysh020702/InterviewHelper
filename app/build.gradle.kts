@@ -4,7 +4,7 @@ plugins {
 
     alias(libs.plugins.google.devtools.ksp)
     alias(libs.plugins.google.dagger.hilt)
-    //id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
     kotlin("plugin.serialization") version "2.0.21"
     alias(libs.plugins.kotlin.compose)
 }
@@ -66,6 +66,15 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation("androidx.navigation:navigation-compose:2.9.0")
+    implementation("androidx.compose.material:material-icons-extended")
+
+    //firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-database")
+
     //Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -73,16 +82,24 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    var hilt_version = 2.51
+    var hiltVersion = 2.51
     //dagger Hilt
-    implementation("com.google.dagger:hilt-android:$hilt_version")
-    ksp("com.google.dagger:hilt-compiler:$hilt_version")
+    implementation("com.google.dagger:hilt-android:$hiltVersion")
+    ksp("com.google.dagger:hilt-compiler:$hiltVersion")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // Retrofit & OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.11")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation(libs.androidx.foundation)
+
+    implementation ("com.google.android.gms:play-services-auth:21.3.0")
+
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+    implementation("com.github.wendykierp:JTransforms:3.1")
 
 }
