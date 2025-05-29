@@ -16,6 +16,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -35,21 +36,12 @@ import kotlin.math.pow
 fun InterviewScreen(
     question: String,
     userName: String,
-    viewModel: InterviewViewModel = hiltViewModel()
+    isRecording: Boolean,                   //현재 녹음 중인지 표시 \
+    elapsed: Int,
+    frequencies: List<Float>,               //주파수 받아서 오디오 바 표시
+    uploadState: ResultState,               //로딩 중에 다른 화면 표시
+    onToggleRecording: () -> Unit           //녹음 버튼이 눌렸을 때 실행할 함수
 ) {
-    val isRecording by remember { derivedStateOf { viewModel.isRecording } }
-    val elapsed by remember { derivedStateOf { viewModel.elapsedTime } }
-    val frequencies by remember { derivedStateOf { viewModel.frequencyBins } }
-    val uploadState by viewModel.uploadState.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.startFrequencyAnalysis()
-    }
-
-    DisposableEffect(Unit) {
-        onDispose { viewModel.stopFrequencyAnalysis() }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -63,12 +55,12 @@ fun InterviewScreen(
             isRecording = isRecording,
             elapsed = elapsed,
             frequencies = frequencies,
-            uploadState = uploadState,
-            onToggleRecording = { viewModel.toggleRecording(userName, question) },
-            modifier = Modifier.weight(0.65f)
+            uploadState = uploadState,   // ✅ 전달
+            onToggleRecording = onToggleRecording
         )
     }
 }
+
 
 @Composable
 fun QuestionDisplay(
@@ -102,6 +94,8 @@ fun ControlPanel(
     onToggleRecording: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isUploading = uploadState is ResultState.Loading
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -110,14 +104,30 @@ fun ControlPanel(
             .padding(32.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(if (isUploading) 0.5f else 1f),              //업로드 및 처리 시 투명해지게
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            MicButton(isRecording, onToggleRecording)
+            MicButton(isRecording && !isUploading, onToggleRecording)
             TimerDisplay(elapsed)
             FrequencyVisualizer(frequencies)
-            UploadStatus(uploadState)
+        }
+
+        if (isUploading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White.copy(alpha = 0.7f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("분석 중입니다...", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
         }
     }
 }
@@ -188,22 +198,6 @@ fun FrequencyVisualizer(frequencies: List<Float>) {
     }
 }
 
-
-
-
-@Composable
-fun UploadStatus(uploadState: ResultState) {
-    when (uploadState) {
-        is ResultState.Loading -> CircularProgressIndicator()
-        is ResultState.Success -> Text("업로드 완료!", color = Color.Green)
-        is ResultState.Error -> Text(
-            uploadState.message,
-            color = Color.Red,
-            style = MaterialTheme.typography.bodySmall
-        )
-        else -> Unit
-    }
-}
 
 @Preview(showBackground = true)
 @Composable

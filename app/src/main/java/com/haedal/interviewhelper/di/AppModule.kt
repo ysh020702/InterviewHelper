@@ -6,10 +6,9 @@ import com.google.firebase.database.FirebaseDatabase
 import com.haedal.interviewhelper.data.remote.ApiService
 import com.haedal.interviewhelper.data.remote.RetrofitInstance
 import com.haedal.interviewhelper.data.repository.AudioRecorderRepositoryImpl
-import com.haedal.interviewhelper.data.repository.AudioRepositoryImpl
+import com.haedal.interviewhelper.data.repository.AudioUploadRepositoryImpl
 import com.haedal.interviewhelper.domain.repository.AudioRecorderRepository
-import com.haedal.interviewhelper.domain.repository.AudioRepository
-import dagger.Binds
+import com.haedal.interviewhelper.domain.repository.AudioUploadRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,7 +34,7 @@ object AppModule {
     @Provides
     fun provideAudioRepository(
         apiService: ApiService
-    ): AudioRepository = AudioRepositoryImpl(apiService)
+    ): AudioUploadRepository = AudioUploadRepositoryImpl(apiService)
 
     @Provides
     @Singleton

@@ -1,22 +1,19 @@
 package com.haedal.interviewhelper.data.repository
 
 import com.haedal.interviewhelper.data.remote.ApiService
-import com.haedal.interviewhelper.data.remote.UploadResult
-import com.haedal.interviewhelper.domain.repository.AudioRepository
+import com.haedal.interviewhelper.data.remote.response.AnalysisResponse
+import com.haedal.interviewhelper.domain.repository.AudioUploadRepository
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.ResponseBody
 import retrofit2.Response
 import java.io.File
-import javax.inject.Inject
 
-class AudioRepositoryImpl(
+class AudioUploadRepositoryImpl(
     private val api: ApiService
-) : AudioRepository {
+) : AudioUploadRepository {
 
-    override suspend fun uploadWav(file: File): Response<UploadResult> {
+    override suspend fun uploadWav(file: File): Response<AnalysisResponse> {
         val requestFile = file.asRequestBody("audio/*".toMediaTypeOrNull())
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
