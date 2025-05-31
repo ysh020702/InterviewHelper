@@ -54,7 +54,9 @@ fun OnboardingScreen() {
     }
 
     BoxWithConstraints(
-        modifier = Modifier.fillMaxSize().background(White)
+        modifier = Modifier
+            .fillMaxSize()
+            .background(White)
     ) {
         // 화면 높이의 30%를 계산합니다.
         val indicatorTopPadding = this.maxHeight * 0.2f
@@ -66,7 +68,7 @@ fun OnboardingScreen() {
             },
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top=32.dp, end=16.dp)
+                .padding(top = 32.dp, end = 16.dp)
         ) {
             Text(
                 text = "Skip",
@@ -150,7 +152,7 @@ fun OnboardingScreen() {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 4.dp,vertical = 48.dp),
+                            .padding(horizontal = 4.dp, vertical = 48.dp),
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(

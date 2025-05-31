@@ -14,8 +14,10 @@ import com.haedal.interviewhelper.data.remote.response.ResultItem
 import com.haedal.interviewhelper.presentation.activity.result.ResultScreen
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class ResultActivity : ComponentActivity() {
     private val userViewModel: UserViewModel by viewModels()
 
@@ -51,7 +53,6 @@ class ResultActivity : ComponentActivity() {
                 Toast.makeText(this@ResultActivity, "결과 저장 실패", Toast.LENGTH_SHORT).show()
             }
         }
-
 
 
         setContent {

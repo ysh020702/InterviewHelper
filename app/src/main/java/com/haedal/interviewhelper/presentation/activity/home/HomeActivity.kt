@@ -44,12 +44,12 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         checkAudioPermission()
-        //insertDummyDataForTestUser()
+        insertDummyDataForTestUser()
 
         CoroutineScope(Dispatchers.IO).launch {
             val name = userViewModel.loadUserName()
             val dailyQuestion = loadDailyQuestion()                 //오늘의 추천, helpFuntions
-            val feedbackList = userViewModel.loadUserFeedbacks()    //유저 최근 질문
+            val questionList = loadPopularQuestions()    //유저 최근 질문
             val contentList = loadGlobalContents()                  //글로벌 콘텐츠, helpFunctions
             val recentQuestions = userViewModel.loadRecentQuestions()
 
@@ -59,7 +59,7 @@ class HomeActivity : ComponentActivity() {
                     InterviewHelperTheme {
                         HomeScreen(
                             userName = name,
-                            feedbackList = feedbackList,
+                            questionList = questionList,
                             dailyQuestion = dailyQuestion,
                             contentList = contentList,
                             recentQuestions = recentQuestions,

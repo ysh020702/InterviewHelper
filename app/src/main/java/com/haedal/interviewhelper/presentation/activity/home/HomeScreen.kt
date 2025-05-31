@@ -47,7 +47,7 @@ fun HomeScreen(
     onStartInterview: (String) -> Unit,
     onLogout: () -> Unit,
     dailyQuestion: String = "",
-    feedbackList: List<Pair<String, String>>,
+    questionList: List<Pair<String, String>>,
     contentList: List<Pair<String, String>>,
     recentQuestions: List<String>,
     onDeleteQuestion: (String) -> Unit,
@@ -101,7 +101,7 @@ fun HomeScreen(
             item {
                 SectionTitle("인기가 많은 질문")
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    feedbackList.forEach { (question, _) ->
+                    questionList.forEach { (question, _) ->
                         SelectableCardSection(
                             content = question,
                             isSelected = selected == question,
@@ -311,7 +311,7 @@ fun HomePreview() {
             onStartInterview = {},
             onLogout = {},
             dailyQuestion = "자신의 강점을 말해보세요.",
-            feedbackList = listOf(
+            questionList = listOf(
                 "자신의 단점을 말해보세요." to "말투가 소심하게 들릴 수 있어요. 조금 더 확신 있게 말하면 좋아요.",
                 "성공적인 프로젝트 경험을 말해보세요." to "목표 중심으로 정리하면 더 설득력 있어요."
             ),

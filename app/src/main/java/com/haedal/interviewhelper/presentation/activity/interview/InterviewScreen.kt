@@ -120,13 +120,39 @@ fun ControlPanel(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.7f)),
+                    .background(Color.White.copy(alpha = 0.3f)), // 어두운 오버레이 배경
                 contentAlignment = Alignment.Center
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text("분석 중입니다...", style = MaterialTheme.typography.bodyLarge)
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    elevation = CardDefaults.cardElevation(8.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    modifier = Modifier
+                        .padding(32.dp)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(color = Color03)
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Text(
+                            text = "AI가 인터뷰 답변을 분석하고 있어요.",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "약 3~5분 정도 소요될 수 있으니\n잠시만 기다려 주세요.",
+                            style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
