@@ -3,6 +3,8 @@
 package com.haedal.interviewhelper.presentation.activity.home
 
 
+import android.widget.Toast
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -116,18 +118,19 @@ fun HomeScreen(
 
             item {
                 SectionTitle("최근에 답변한 질문")
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    recentQuestions.forEach { question ->
-                        DeleteableCardSection(
-                            content = question,
-                            isSelected = selected == question,
-                            onSelect = {
-                                //TODO: resultActivity 띄우기
-                                vibrate(context)
-                                onShowQuestion(question)
-                            },
-                            onDelete = { onDeleteQuestion(question) }
-                        )
+                Crossfade(targetState = recentQuestions) { questions ->
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        questions.forEach { question ->
+                            DeleteableCardSection(
+                                content = question,
+                                isSelected = selected == question,
+                                onSelect = {
+                                    vibrate(context)
+                                    onShowQuestion(question)
+                                },
+                                onDelete = { onDeleteQuestion(question) }
+                            )
+                        }
                     }
                 }
             }
@@ -136,7 +139,9 @@ fun HomeScreen(
                 SectionTitle("추천 콘텐츠")
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     contentList.forEach { (title, description) ->
-                        ContentCard(title = title, description = description)
+                        ContentCard(title = title,
+                            description = description,
+                            onClick = { Toast.makeText(context, "콘텐츠 준비중입니다.", Toast.LENGTH_SHORT).show()})
                     }
                 }
             }
@@ -228,14 +233,14 @@ fun DeleteableCardSection(
     }
     Card(
         shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(2.dp, if (isSelected) Color03 else Color.Gray),
+        border = BorderStroke(2.dp, Color.Gray),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Color03.copy(alpha = 0.2f) else Color.White
+            containerColor = White
         ),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
-                onClick = {onSelect}, // 일반 클릭 무시
+                onClick = {onSelect()}, // 일반 클릭 시 결과 화면으로 이동
                 onLongClick = {
                     showDialog = true // 길게 눌렀을 때 다이얼로그 출력
                 }
@@ -278,12 +283,13 @@ fun FeedbackCard(question: String, feedback: String) {
 }
 
 @Composable
-fun ContentCard(title: String, description: String) {
+fun ContentCard(title: String, description: String, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(2.dp, Color.Gray),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(

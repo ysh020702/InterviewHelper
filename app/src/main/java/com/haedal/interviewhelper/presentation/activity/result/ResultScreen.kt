@@ -2,7 +2,7 @@ package com.haedal.interviewhelper.presentation.activity.result
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,20 +15,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.QuestionAnswer
-import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItemDefaults.contentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import com.haedal.interviewhelper.data.remote.response.Emotion
 import com.haedal.interviewhelper.data.remote.response.ResultItem
 import com.haedal.interviewhelper.domain.helpfunction.moveActivity
-import com.haedal.interviewhelper.presentation.activity.auth.AuthActivity
 import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 import com.haedal.interviewhelper.presentation.theme.Color02
 import com.haedal.interviewhelper.presentation.theme.Color03
@@ -56,108 +50,119 @@ fun ResultScreen(
 ) {
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 56.dp, bottom = 48.dp, start=24.dp, end=24.dp) // 상단 여백 (예: 앱바 아래), 하단은 버튼과 겹치지 않도록
-    ) {
-        LazyColumn(
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // 🔵 흐릿한 배경 레이어
+        Box(
             modifier = Modifier
-                .weight(1f)
+                .matchParentSize()
+                .background(Color.White.copy(alpha = 0.6f))
+                .blur(30.dp)
+        )
+
+        // ⚪ 본문 컨텐츠
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 56.dp, bottom = 48.dp, start = 24.dp, end = 24.dp)
         ) {
-            // 1. 면접 질문 카드
-            item {
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(2.dp, Color05),
-                    colors = CardDefaults.cardColors(containerColor = Color05.copy(alpha = 0.08f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Default.QuestionAnswer,
-                                contentDescription = "면접 질문",
-                                tint = Color04
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                // 1. 면접 질문 카드
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        border = BorderStroke(2.dp, Color05),
+                        colors = CardDefaults.cardColors(containerColor = Color05.copy(alpha = 0.08f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(20.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.QuestionAnswer,
+                                    contentDescription = "면접 질문",
+                                    tint = Color04
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "면접 질문",
+                                    style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color04
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "면접 질문",
-                                style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                                color = Color04
+                                text = question,
+                                style = Typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                                color = Color.Black
                             )
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = question,
-                            style = Typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                            color = Color.Black
-                        )
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                // 2. 분석 결과 타이틀
+                item {
+                    SectionTitle("분석 결과")
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+
+                // 3. 감정 분석 결과 카드 목록
+                items(resultList) { item ->
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, Color.Gray),
+                        colors = CardDefaults.cardColors(containerColor = White),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("🗣️ \"${item.sentence}\"", style = Typography.bodyMedium)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            item.emotions
+                                .sortedByDescending { it.score }
+                                .take(3)
+                                .forEach {
+                                    Text("→ ${it.label}: ${"%.2f".format(it.score)}")
+                                }
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
 
-            // 2. 분석 결과 타이틀
-            item {
-                SectionTitle("분석 결과")
-                Spacer(modifier = Modifier.height(2.dp))
-            }
-
-            // 3. 감정 분석 결과 카드 목록
-            items(resultList) { item ->
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, Color.Gray),
-                    colors = CardDefaults.cardColors(containerColor = White),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 6.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("🗣️ \"${item.sentence}\"", style = Typography.bodyMedium)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        item.emotions
-                            .sortedByDescending { it.score }
-                            .take(3)
-                            .forEach {
-                                Text("→ ${it.label}: ${"%.2f".format(it.score)}")
-                            }
+                // 4. ChatGPT 피드백 카드
+                item {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    SectionTitle("ChatGPT 피드백")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(2.dp, Color02),
+                        colors = CardDefaults.cardColors(containerColor = Color02.copy(alpha = 0.3f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(feedback, style = Typography.bodyLarge)
+                        }
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
 
-            // 4. ChatGPT 피드백 카드
-            item {
-                Spacer(modifier = Modifier.height(10.dp))
-                SectionTitle("ChatGPT 피드백")
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(2.dp, Color02),
-                    colors = CardDefaults.cardColors(containerColor = Color02.copy(alpha = 0.3f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(feedback, style = Typography.bodyLarge)
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+            Spacer(modifier = Modifier.height(16.dp))
+            // 5. 하단 버튼
+            PrimaryButton(
+                text = "홈 화면으로 돌아가기",
+                onClick = { moveActivity<HomeActivity>(context = context, finishFlag = true) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(48.dp),
+                containerColor = Color03,
+                contentColor = White
+            )
         }
-
-        // 5. 하단 버튼
-        PrimaryButton(
-            text = "홈 화면으로 돌아가기",
-            onClick = { moveActivity<HomeActivity>(context = context, finishFlag = true) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            containerColor = Color03,
-            contentColor = White
-        )
     }
 }
+
 
 
 @Composable

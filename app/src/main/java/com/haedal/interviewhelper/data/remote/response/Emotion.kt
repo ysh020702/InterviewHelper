@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Emotion(
-    val label: String,
-    val score: Float
+    val label: String = "",
+    val score: Float = 0f
 )

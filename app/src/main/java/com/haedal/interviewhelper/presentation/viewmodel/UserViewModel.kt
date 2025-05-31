@@ -1,5 +1,7 @@
 package com.haedal.interviewhelper.presentation.viewmodel
 
+import android.util.Log
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -112,18 +114,22 @@ open class UserViewModel @Inject constructor(
         }
     }
 
-    suspend fun loadRecentQuestions(): List<String> {
-        val uid = fbAuth.currentUser?.uid ?: return emptyList()
 
-        val snapshot = dbRef.child(uid)
-            .child("results")
-            .get()
-            .await()
+    private val _recentQuestions = mutableStateOf<List<String>>(emptyList())
+    val recentQuestions: State<List<String>> = _recentQuestions
 
-        // timestamp → question 매핑에서 question만 추출
-        return snapshot.children.mapNotNull {
-            it.child("question").getValue(String::class.java)
-        }.sortedByDescending { it } // (선택) 최신순 정렬용
+    // 결과 저장 시 또는 초기 로드 시 호출
+    suspend fun loadRecentQuestions() {
+        val uid = fbAuth.currentUser?.uid ?: return
+        try {
+            val snapshot = dbRef.child(uid).child("results").get().await()
+            val questions = snapshot.children.mapNotNull {
+                it.child("question").getValue(String::class.java)
+            }.reversed() // 최신순으로 정렬하고 싶다면 reversed 추가
+            _recentQuestions.value = questions
+        } catch (e: Exception) {
+            Log.e("UserViewModel", "loadRecentQuestions: ${e.message}")
+        }
     }
 
     suspend fun deleteResultByQuestion(targetQuestion: String): Boolean {
@@ -151,22 +157,25 @@ open class UserViewModel @Inject constructor(
         return false
     }
 
+
+    /**
+     * 특정 질문에 해당하는 결과를 Firebase에서 비동기로 로드합니다.
+     * @param targetQuestion 검색하고자 하는 질문 텍스트
+     * @return FeedbackResult 객체 또는 null
+     */
     suspend fun loadResultByQuestion(targetQuestion: String): FeedbackResult? {
         val uid = fbAuth.currentUser?.uid ?: return null
 
-        val snapshot = dbRef
-            .child(uid)
-            .child("results")
-            .get()
-            .await()
+        return try {
+            val snapshot = dbRef.child(uid).child("results").get().await()
 
-        for (child in snapshot.children) {
-            val question = child.child("question").getValue(String::class.java)
-            if (question == targetQuestion) {
-                return child.getValue(FeedbackResult::class.java)
-            }
+            snapshot.children
+                .firstOrNull { it.child("question").getValue(String::class.java) == targetQuestion }
+                ?.getValue(FeedbackResult::class.java)
+        } catch (e: Exception) {
+            Log.e("UserViewModel", "loadResultByQuestion error: ${e.message}", e)
+            null
         }
-        return null
     }
 
 

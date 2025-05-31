@@ -33,6 +33,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import com.google.gson.Gson
+import com.haedal.interviewhelper.domain.helpfunction.moveActivity
+import com.haedal.interviewhelper.presentation.activity.home.HomeActivity
 
 
 /*
@@ -45,6 +47,7 @@ import com.google.gson.Gson
 @AndroidEntryPoint
 class InterviewActivity : ComponentActivity() {
 
+    private val context: Context = this@InterviewActivity
     private val viewModel: InterviewViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
     private val RECORD_AUDIO_REQUEST_CODE = 1001
@@ -79,9 +82,13 @@ class InterviewActivity : ComponentActivity() {
                 }
 
                 val uploadState by viewModel.uploadState.collectAsState()
-                BackHandler(enabled = uploadState is ResultState.Loading) {
-                    // 아무것도 안 함 = 뒤로가기 무시됨
-                    Toast.makeText(this, "분석 중입니다. 잠시만 기다려주세요.", Toast.LENGTH_SHORT).show()
+                BackHandler {
+                    if (uploadState is ResultState.Loading) {
+                        Toast.makeText(this, "분석 중입니다. 잠시만 기다려주세요.", Toast.LENGTH_SHORT).show()
+                    } else {
+                        // 홈 화면으로 이동
+                        moveActivity<HomeActivity>(context = context, finishFlag = true)
+                    }
                 }
 
                 InterviewScreenContainer(
@@ -121,6 +128,7 @@ class InterviewActivity : ComponentActivity() {
                         intent.putExtra("result_json", Gson().toJson(resultList))
                         intent.putExtra("server_message", message)
                         intent.putExtra("analysis_feedback", feedback)
+                        intent.putExtra("save",true)
                         val options = ActivityOptions.makeCustomAnimation(
                             this@InterviewActivity,
                             android.R.anim.fade_in,

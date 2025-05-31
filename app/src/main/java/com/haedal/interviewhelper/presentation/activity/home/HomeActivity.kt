@@ -1,5 +1,9 @@
+// HomeActivity.kt
 package com.haedal.interviewhelper.presentation.activity.home
 
+import android.Manifest
+import android.app.ActivityOptions
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -8,37 +12,46 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.core.app.ActivityCompat
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
+import com.google.gson.Gson
 import com.haedal.interviewhelper.domain.helpfunction.*
-import com.haedal.interviewhelper.domain.helpfunction.moveActivity
 import com.haedal.interviewhelper.presentation.activity.auth.AuthActivity
 import com.haedal.interviewhelper.presentation.activity.interview.InterviewActivity
+import com.haedal.interviewhelper.presentation.activity.result.ResultActivity
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
+import com.haedal.interviewhelper.presentation.viewmodel.HomeViewModel
 import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import android.Manifest
-import android.content.Intent
-import androidx.lifecycle.lifecycleScope
-import com.google.gson.Gson
-import com.haedal.interviewhelper.presentation.activity.result.ResultActivity
-import com.haedal.interviewhelper.presentation.viewmodel.HomeViewModel
-import kotlin.reflect.KProperty
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
 
     private val homeViewModel: HomeViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
-    private val RECORD_AUDIO_PERMISSION = android.Manifest.permission.RECORD_AUDIO
-    private val PERMISSION_REQUEST_CODE = 1001
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,103 +59,58 @@ class HomeActivity : ComponentActivity() {
         checkAudioPermission()
         insertDummyDataForTestUser()
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val name = userViewModel.loadUserName()
-            val dailyQuestion = loadDailyQuestion()                 //오늘의 추천, helpFuntions
-            val questionList = loadPopularQuestions()    //유저 최근 질문
-            val contentList = loadGlobalContents()                  //글로벌 콘텐츠, helpFunctions
-            val recentQuestions = userViewModel.loadRecentQuestions()
-
-
-            withContext(Dispatchers.Main) {
-                setContent {
-                    InterviewHelperTheme {
-                        HomeScreen(
-                            userName = name,
-                            questionList = questionList,
-                            dailyQuestion = dailyQuestion,
-                            contentList = contentList,
-                            recentQuestions = recentQuestions,
-                            onStartInterview = { selectedQuestion ->
-                                val intent =
-                                    Intent(this@HomeActivity, InterviewActivity::class.java)
-                                intent.putExtra("question", selectedQuestion)
-                                startActivity(intent)
-                            },
-                            onLogout = {
-                                FirebaseAuth.getInstance().signOut()
-                                moveActivity<AuthActivity>(
-                                    context = this@HomeActivity,
-                                    finishFlag = true
-                                )
-                            },
-                            onDeleteQuestion = { question ->
-                                lifecycleScope.launch {
-                                    val success = userViewModel.deleteResultByQuestion(question)
-                                    if (success) {
-                                        Toast.makeText(this@HomeActivity, "삭제 완료", Toast.LENGTH_SHORT).show()
-                                        val updated = userViewModel.loadRecentQuestions()
-                                        // 갱신된 recentQuestions로 recomposition 유도 필요
-                                        // 상태 변수로 관리하면 좋음
-                                    } else {
-                                        Toast.makeText(this@HomeActivity, "삭제 실패", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            },
-                            onShowQuestion = { question -> openResultActivityByQuestion(question) },
-                            homeViewModel = homeViewModel
-                        )
+        setContent {
+            InterviewHelperTheme {
+                HomeScreenContainer(
+                    homeViewModel = homeViewModel,
+                    userViewModel = userViewModel,
+                    onStartInterview = { selectedQuestion ->
+                        val intent = Intent(this, InterviewActivity::class.java).apply {
+                            putExtra("question", selectedQuestion)
+                        }
+                        startActivity(intent)
+                        finish()
+                    },
+                    onLogout = {
+                        FirebaseAuth.getInstance().signOut()
+                        moveActivity<AuthActivity>(context = this, finishFlag = true)
+                    },
+                    onDeleteQuestion = { question ->
+                        lifecycleScope.launch {
+                            val success = userViewModel.deleteResultByQuestion(question)
+                            if (success) {
+                                Toast.makeText(this@HomeActivity, "삭제 완료", Toast.LENGTH_SHORT).show()
+                                userViewModel.loadRecentQuestions()
+                            } else {
+                                Toast.makeText(this@HomeActivity, "삭제 실패", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    onShowQuestion = { question ->
+                        openResultActivityByQuestion(question)
                     }
-                }
+                )
             }
         }
     }
 
     private fun checkAudioPermission() {
-        val audioGranted = ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
-        val vibrateGranted = ContextCompat.checkSelfPermission(
-            this,
+        val permissionsNeeded = listOf(
+            Manifest.permission.RECORD_AUDIO,
             Manifest.permission.VIBRATE
-        ) == PackageManager.PERMISSION_GRANTED
+        ).filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
 
-        when {
-            audioGranted && vibrateGranted -> {
-                // 둘 다 권한 있음
-            }
-
-            shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
-                Toast.makeText(this, "이 기능을 사용하려면 마이크 및 진동 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
-                requestAudioPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.RECORD_AUDIO,
-                        Manifest.permission.VIBRATE
-                    )
-                )
-            }
-
-            else -> {
-                requestAudioPermissionLauncher.launch(
-                    arrayOf(
-                        Manifest.permission.RECORD_AUDIO,
-                        Manifest.permission.VIBRATE
-                    )
-                )
-            }
+        if (permissionsNeeded.isNotEmpty()) {
+            requestAudioPermissionLauncher.launch(permissionsNeeded.toTypedArray())
         }
     }
 
     private val requestAudioPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val audioGranted = permissions[Manifest.permission.RECORD_AUDIO] ?: false
-        val vibrateGranted = permissions[Manifest.permission.VIBRATE] ?: false
-
-        if (audioGranted && vibrateGranted) {
-            // 권한 허용됨
-        } else {
+        if (permissions.values.any { !it }) {
             Toast.makeText(this, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
@@ -157,26 +125,78 @@ class HomeActivity : ComponentActivity() {
                         putExtra("result_json", Gson().toJson(result.resultList))
                         putExtra("server_message", result.serverMessage)
                         putExtra("analysis_feedback", result.feedback)
+                        putExtra("save", false)
                     }
-                    startActivity(intent)
-                } else {
-                    Toast.makeText(
+                    val options = ActivityOptions.makeCustomAnimation(
                         this@HomeActivity,
-                        "선택한 질문의 결과를 찾을 수 없습니다.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                        android.R.anim.fade_in,
+                        android.R.anim.fade_out
+                    )
+                    startActivity(intent, options.toBundle())
+                } else {
+                    Toast.makeText(this@HomeActivity, "결과가 없습니다.", Toast.LENGTH_SHORT).show()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
-                Toast.makeText(
-                    this@HomeActivity,
-                    "결과를 불러오는 중 오류가 발생했습니다.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(this@HomeActivity, "오류 발생: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
-
 }
+
+@Composable
+fun HomeScreenContainer(
+    homeViewModel: HomeViewModel,
+    userViewModel: UserViewModel,
+    onStartInterview: (String) -> Unit,
+    onLogout: () -> Unit,
+    onDeleteQuestion: (String) -> Unit,
+    onShowQuestion: (String) -> Unit
+) {
+    var isLoading by remember { mutableStateOf(true) }
+    var userName by remember { mutableStateOf("사용자") }
+    var dailyQuestion by remember { mutableStateOf("") }
+    var questionList by remember { mutableStateOf(emptyList<Pair<String, String>>()) }
+    var contentList by remember { mutableStateOf(emptyList<Pair<String, String>>()) }
+    val recentQuestions by userViewModel.recentQuestions
+
+    LaunchedEffect(Unit) {
+        userName = userViewModel.loadUserName()
+        dailyQuestion = loadDailyQuestion()
+        questionList = loadPopularQuestions()
+        contentList = loadGlobalContents()
+        userViewModel.loadRecentQuestions()
+        isLoading = false
+    }
+
+    if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "홈 화면 로딩 중이에요.",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    } else {
+        HomeScreen(
+            userName = userName,
+            questionList = questionList,
+            dailyQuestion = dailyQuestion,
+            contentList = contentList,
+            recentQuestions = recentQuestions,
+            onStartInterview = onStartInterview,
+            onLogout = onLogout,
+            onDeleteQuestion = onDeleteQuestion,
+            onShowQuestion = onShowQuestion,
+            homeViewModel = homeViewModel
+        )
+    }
+}
+
