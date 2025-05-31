@@ -3,6 +3,7 @@ package com.haedal.interviewhelper.presentation.activity.result
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.haedal.interviewhelper.data.remote.response.ResultItem
@@ -12,6 +13,7 @@ import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 class ResultActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         val json = intent.getStringExtra("result_json") ?: "[]"
         val message = intent.getStringExtra("server_message") ?: ""
