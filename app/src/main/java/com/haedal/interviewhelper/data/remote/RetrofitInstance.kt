@@ -9,7 +9,7 @@ object RetrofitInstance {
 
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS) // 서버 연결까지 대기 시간
-        .readTimeout(120, TimeUnit.SECONDS)    // 서버 응답까지 대기 시간 (← 이게 중요!)
+        .readTimeout(180, TimeUnit.SECONDS)    // 서버 응답까지 대기 시간 (← 이게 중요!)
         .writeTimeout(60, TimeUnit.SECONDS)   // 데이터 전송 시간
         .build()
 
