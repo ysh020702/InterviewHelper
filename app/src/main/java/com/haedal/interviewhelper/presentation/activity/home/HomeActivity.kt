@@ -25,11 +25,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import android.Manifest
 import android.content.Intent
+import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
+import com.haedal.interviewhelper.presentation.activity.result.ResultActivity
+import com.haedal.interviewhelper.presentation.viewmodel.HomeViewModel
+import kotlin.reflect.KProperty
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
 
-    private val viewModel: UserViewModel by viewModels()
+    private val homeViewModel: HomeViewModel by viewModels()
+    private val userViewModel: UserViewModel by viewModels()
     private val RECORD_AUDIO_PERMISSION = android.Manifest.permission.RECORD_AUDIO
     private val PERMISSION_REQUEST_CODE = 1001
 
@@ -38,13 +44,14 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         checkAudioPermission()
-        insertDummyDataForTestUser()
+        //insertDummyDataForTestUser()
 
         CoroutineScope(Dispatchers.IO).launch {
-            val name = viewModel.loadUserName()
-            val dailyQuestion = loadDailyQuestion()             //오늘의 추천
-            val feedbackList = viewModel.loadUserFeedbacks()    //유저 최근 질문
-            val contentList = loadGlobalContents()              //글로벌 콘텐츠
+            val name = userViewModel.loadUserName()
+            val dailyQuestion = loadDailyQuestion()                 //오늘의 추천, helpFuntions
+            val feedbackList = userViewModel.loadUserFeedbacks()    //유저 최근 질문
+            val contentList = loadGlobalContents()                  //글로벌 콘텐츠, helpFunctions
+            val recentQuestions = userViewModel.loadRecentQuestions()
 
 
             withContext(Dispatchers.Main) {
@@ -55,15 +62,35 @@ class HomeActivity : ComponentActivity() {
                             feedbackList = feedbackList,
                             dailyQuestion = dailyQuestion,
                             contentList = contentList,
+                            recentQuestions = recentQuestions,
                             onStartInterview = { selectedQuestion ->
-                                val intent = Intent(this@HomeActivity, InterviewActivity::class.java)
+                                val intent =
+                                    Intent(this@HomeActivity, InterviewActivity::class.java)
                                 intent.putExtra("question", selectedQuestion)
                                 startActivity(intent)
                             },
                             onLogout = {
                                 FirebaseAuth.getInstance().signOut()
-                                moveActivity<AuthActivity>(context = this@HomeActivity, finishFlag = true)
-                            }
+                                moveActivity<AuthActivity>(
+                                    context = this@HomeActivity,
+                                    finishFlag = true
+                                )
+                            },
+                            onDeleteQuestion = { question ->
+                                lifecycleScope.launch {
+                                    val success = userViewModel.deleteResultByQuestion(question)
+                                    if (success) {
+                                        Toast.makeText(this@HomeActivity, "삭제 완료", Toast.LENGTH_SHORT).show()
+                                        val updated = userViewModel.loadRecentQuestions()
+                                        // 갱신된 recentQuestions로 recomposition 유도 필요
+                                        // 상태 변수로 관리하면 좋음
+                                    } else {
+                                        Toast.makeText(this@HomeActivity, "삭제 실패", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            },
+                            onShowQuestion = { question -> openResultActivityByQuestion(question) },
+                            homeViewModel = homeViewModel
                         )
                     }
                 }
@@ -72,13 +99,20 @@ class HomeActivity : ComponentActivity() {
     }
 
     private fun checkAudioPermission() {
-        val audioGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-        val vibrateGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED
+        val audioGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+        val vibrateGranted = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.VIBRATE
+        ) == PackageManager.PERMISSION_GRANTED
 
         when {
             audioGranted && vibrateGranted -> {
                 // 둘 다 권한 있음
             }
+
             shouldShowRequestPermissionRationale(Manifest.permission.RECORD_AUDIO) -> {
                 Toast.makeText(this, "이 기능을 사용하려면 마이크 및 진동 권한이 필요합니다.", Toast.LENGTH_SHORT).show()
                 requestAudioPermissionLauncher.launch(
@@ -88,6 +122,7 @@ class HomeActivity : ComponentActivity() {
                     )
                 )
             }
+
             else -> {
                 requestAudioPermissionLauncher.launch(
                     arrayOf(
@@ -98,6 +133,7 @@ class HomeActivity : ComponentActivity() {
             }
         }
     }
+
     private val requestAudioPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -110,6 +146,37 @@ class HomeActivity : ComponentActivity() {
             Toast.makeText(this, "권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
         }
     }
+
+    private fun openResultActivityByQuestion(question: String) {
+        lifecycleScope.launch {
+            try {
+                val result = userViewModel.loadResultByQuestion(question)
+                if (result != null) {
+                    val intent = Intent(this@HomeActivity, ResultActivity::class.java).apply {
+                        putExtra("question", result.question)
+                        putExtra("result_json", Gson().toJson(result.resultList))
+                        putExtra("server_message", result.serverMessage)
+                        putExtra("analysis_feedback", result.feedback)
+                    }
+                    startActivity(intent)
+                } else {
+                    Toast.makeText(
+                        this@HomeActivity,
+                        "선택한 질문의 결과를 찾을 수 없습니다.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Toast.makeText(
+                    this@HomeActivity,
+                    "결과를 불러오는 중 오류가 발생했습니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
 
 
 }

@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.haedal.interviewhelper.data.local.FeedbackResult
 import com.haedal.interviewhelper.domain.model.UserData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.tasks.await
@@ -18,7 +19,7 @@ open class UserViewModel @Inject constructor(
     private val fbDb: FirebaseDatabase
 ) : ViewModel() {
 
-    var loginResult by mutableStateOf<Result<Unit>?>(null)
+    open var loginResult by mutableStateOf<Result<Unit>?>(null)
     var signUpResult by mutableStateOf<Result<Unit>?>(null)
 
     private val dbRef = fbDb.getReference("users")
@@ -94,4 +95,79 @@ open class UserViewModel @Inject constructor(
         loginResult = null
         signUpResult = null
     }
+
+    suspend fun saveResultToFirebase(result: FeedbackResult) :Boolean {
+        val uid = fbAuth.currentUser?.uid ?: return false
+        val timestamp = result.timestamp.toString()
+
+        return try {
+            dbRef.child(uid).child("results")
+                .child(timestamp)
+                .setValue(result)
+                .await()
+            true
+        }
+        catch(e: Exception){
+            false
+        }
+    }
+
+    suspend fun loadRecentQuestions(): List<String> {
+        val uid = fbAuth.currentUser?.uid ?: return emptyList()
+
+        val snapshot = dbRef.child(uid)
+            .child("results")
+            .get()
+            .await()
+
+        // timestamp → question 매핑에서 question만 추출
+        return snapshot.children.mapNotNull {
+            it.child("question").getValue(String::class.java)
+        }.sortedByDescending { it } // (선택) 최신순 정렬용
+    }
+
+    suspend fun deleteResultByQuestion(targetQuestion: String): Boolean {
+        val uid = fbAuth.currentUser?.uid ?: return false
+
+        val snapshot = dbRef
+            .child(uid)
+            .child("results")
+            .get()
+            .await()
+
+
+        for (child in snapshot.children) {
+            val question = child.child("question").getValue(String::class.java)
+            if (question == targetQuestion) {
+                dbRef
+                    .child(uid)
+                    .child("results")
+                    .child(child.key!!) // timestamp
+                    .removeValue()
+                    .await()
+                return true
+            }
+        }
+        return false
+    }
+
+    suspend fun loadResultByQuestion(targetQuestion: String): FeedbackResult? {
+        val uid = fbAuth.currentUser?.uid ?: return null
+
+        val snapshot = dbRef
+            .child(uid)
+            .child("results")
+            .get()
+            .await()
+
+        for (child in snapshot.children) {
+            val question = child.child("question").getValue(String::class.java)
+            if (question == targetQuestion) {
+                return child.getValue(FeedbackResult::class.java)
+            }
+        }
+        return null
+    }
+
+
 }

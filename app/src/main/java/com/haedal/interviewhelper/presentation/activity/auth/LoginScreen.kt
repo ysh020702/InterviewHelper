@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
@@ -27,8 +28,11 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.gms.common.SignInButton
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.database.FirebaseDatabase
 import com.haedal.interviewhelper.domain.helpfunction.WEB_CLIENT_ID
+import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.theme.PrimaryButton
 import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 import kotlinx.coroutines.CoroutineScope

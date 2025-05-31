@@ -48,12 +48,13 @@ class InterviewActivity : ComponentActivity() {
     private val viewModel: InterviewViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
     private val RECORD_AUDIO_REQUEST_CODE = 1001
+    var question: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val question = intent.getStringExtra("question") ?: ""
+        question = intent.getStringExtra("question") ?: ""
         if (question == "") {
             showToast("질문이 전달되지 않았습니다. 홈 화면으로 돌아갑니다.")
             finish()
@@ -116,6 +117,7 @@ class InterviewActivity : ComponentActivity() {
                         delay(1000)
 
                         val intent = Intent(this@InterviewActivity, ResultActivity::class.java)
+                        intent.putExtra("question", question)
                         intent.putExtra("result_json", Gson().toJson(resultList))
                         intent.putExtra("server_message", message)
                         intent.putExtra("analysis_feedback", feedback)
@@ -136,6 +138,7 @@ class InterviewActivity : ComponentActivity() {
     }
 
 }
+
 
 
 @Composable

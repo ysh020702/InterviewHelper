@@ -1,3 +1,5 @@
+@file:Suppress("UNUSED_EXPRESSION")
+
 package com.haedal.interviewhelper.presentation.activity.home
 
 
@@ -24,6 +26,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.QuestionAnswer
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,6 +39,7 @@ import com.haedal.interviewhelper.presentation.theme.Color04
 import com.haedal.interviewhelper.presentation.theme.InterviewHelperTheme
 import com.haedal.interviewhelper.presentation.theme.White
 import com.haedal.interviewhelper.presentation.viewmodel.HomeViewModel
+import com.haedal.interviewhelper.presentation.viewmodel.UserViewModel
 
 @Composable
 fun HomeScreen(
@@ -42,9 +49,12 @@ fun HomeScreen(
     dailyQuestion: String = "",
     feedbackList: List<Pair<String, String>>,
     contentList: List<Pair<String, String>>,
-    viewModel: HomeViewModel = viewModel()
+    recentQuestions: List<String>,
+    onDeleteQuestion: (String) -> Unit,
+    onShowQuestion: (String) -> Unit,
+    homeViewModel: HomeViewModel
 ) {
-    val selected = viewModel.selectedQuestion
+    val selected = homeViewModel.selectedQuestion
     val context = LocalContext.current
 
 
@@ -58,7 +68,7 @@ fun HomeScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 16.dp),
+                .padding(top = 8.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -84,12 +94,12 @@ fun HomeScreen(
                     isSelected = selected == dailyQuestion,
                     onSelect = {
                         vibrate(context)
-                        viewModel.toggleSelection(dailyQuestion)
+                        homeViewModel.toggleSelection(dailyQuestion)
                     }
                 )
             }
             item {
-                SectionTitle("최근 피드백받은 질문")
+                SectionTitle("인기가 많은 질문")
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     feedbackList.forEach { (question, _) ->
                         SelectableCardSection(
@@ -97,12 +107,31 @@ fun HomeScreen(
                             isSelected = selected == question,
                             onSelect = {
                                 vibrate(context)
-                                viewModel.toggleSelection(question)
+                                homeViewModel.toggleSelection(question)
                             }
                         )
                     }
                 }
             }
+
+            item {
+                SectionTitle("최근에 답변한 질문")
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    recentQuestions.forEach { question ->
+                        DeleteableCardSection(
+                            content = question,
+                            isSelected = selected == question,
+                            onSelect = {
+                                //TODO: resultActivity 띄우기
+                                vibrate(context)
+                                onShowQuestion(question)
+                            },
+                            onDelete = { onDeleteQuestion(question) }
+                        )
+                    }
+                }
+            }
+
             item {
                 SectionTitle("추천 콘텐츠")
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -169,6 +198,64 @@ fun SelectableCardSection(
 }
 
 @Composable
+fun DeleteableCardSection(
+    content: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
+    onDelete: (() -> Unit)? = null
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("삭제 확인") },
+            text = { Text("이 질문을 삭제하시겠습니까?\n\"$content\"") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDialog = false
+                    onDelete?.invoke()
+                }) {
+                    Text("삭제")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
+    }
+    Card(
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(2.dp, if (isSelected) Color03 else Color.Gray),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) Color03.copy(alpha = 0.2f) else Color.White
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {onSelect}, // 일반 클릭 무시
+                onLongClick = {
+                    showDialog = true // 길게 눌렀을 때 다이얼로그 출력
+                }
+            )
+    ) {
+        Row(modifier = Modifier.padding(16.dp)) {
+            Icon(Icons.Default.QuestionAnswer, contentDescription = null, tint = Color04)
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+
+
+@Composable
 fun FeedbackCard(question: String, feedback: String) {
     Card(
         shape = RoundedCornerShape(12.dp),
@@ -215,11 +302,15 @@ fun ContentCard(title: String, description: String) {
 @Preview(showBackground = true)
 @Composable
 fun HomePreview() {
+    // 더미 뷰모델 객체 (기능 없음)
+    val dummyViewModel = object : HomeViewModel() {}
+
     InterviewHelperTheme {
         HomeScreen(
             userName = "양승환",
             onStartInterview = {},
             onLogout = {},
+            dailyQuestion = "자신의 강점을 말해보세요.",
             feedbackList = listOf(
                 "자신의 단점을 말해보세요." to "말투가 소심하게 들릴 수 있어요. 조금 더 확신 있게 말하면 좋아요.",
                 "성공적인 프로젝트 경험을 말해보세요." to "목표 중심으로 정리하면 더 설득력 있어요."
@@ -227,7 +318,15 @@ fun HomePreview() {
             contentList = listOf(
                 "모범 답변 듣기" to "다른 사람들의 실제 인터뷰 답변을 들어보세요.",
                 "AI 피드백 예시 보기" to "AI가 실제로 어떻게 피드백을 주는지 확인해보세요."
-            )
+            ),
+            recentQuestions = listOf(
+                "최근에 도전한 경험은?",
+                "리더십 경험이 있나요?",
+                "협업 중 갈등을 어떻게 해결했나요?"
+            ),
+            homeViewModel = dummyViewModel,
+            onDeleteQuestion = {}, // Preview에서는 빈 람다
+            onShowQuestion = {}  // Preview에서는 빈 람다
         )
     }
 }

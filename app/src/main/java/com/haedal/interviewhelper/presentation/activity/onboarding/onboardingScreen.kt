@@ -106,7 +106,7 @@ fun OnboardingScreen() {
                 .fillMaxSize()
                 .padding(
                     top = indicatorTopPadding + 16.dp, // 인디케이터 높이(8.dp)와 추가 여백 고려
-                    bottom = 80.dp, // 하단 버튼을 위한 충분한 공간
+                    bottom = 48.dp, // 하단 버튼을 위한 충분한 공간
                     start = 24.dp,
                     end = 24.dp
                 ),
